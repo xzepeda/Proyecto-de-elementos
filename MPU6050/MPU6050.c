@@ -1,0 +1,70 @@
+/*MPU6050.H 
+        Created on: Dec 03, 2024
+        Authors: Ximena Zepeda and Claudio Morales
+*/
+
+#include "MPU6050.h"
+void mpu_init(void) {
+    uint8_t lectura = I2C_READ(MPU6050_ADDRESS, PWR_MGMT_1);
+    lectura = lectura&0xB8;
+    I2C_WRITE(MPU6050_ADDRESS, lectura, PWR_MGMT_1);
+    lectura = I2C_READ(MPU6050_ADDRESS, PWR_MGMT_1);
+    lectura = lectura&0xB8;
+    I2C_WRITE(MPU6050_ADDRESS, lectura, PWR_MGMT_1);
+    //CONFIG
+    lectura = I2C_READ(MPU6050_ADDRESS, CONFIG);
+    lectura = lectura&0xF8 + 4;
+    I2C_WRITE(MPU6050_ADDRESS, lectura, CONFIG);
+    //GYRO_CONFIG (+-1000�/s)
+    lectura = I2C_READ(MPU6050_ADDRESS, GYRO_CONFIG);
+    lectura = lectura&0xE7 + 0x10;
+    I2C_WRITE(MPU6050_ADDRESS, lectura, GYRO_CONFIG);
+    //ACCEL_CONFIG (+-2g)
+    lectura = I2C_READ(MPU6050_ADDRESS, ACCEL_CONFIG);
+    lectura = lectura&0xE7;
+    I2C_WRITE(MPU6050_ADDRESS, lectura, ACCEL_CONFIG);
+};
+
+
+void mpu_read(float * GYRO_COOKED, float * ACCEL_COOKED) {
+    uint8_t GYRO_RAW[6];
+    GYRO_RAW[0] = I2C_READ(MPU6050_ADDRESS, GYRO_XOUT_H);
+    GYRO_RAW[1] = I2C_READ(MPU6050_ADDRESS, GYRO_XOUT_L);
+    GYRO_RAW[2] = I2C_READ(MPU6050_ADDRESS, GYRO_YOUT_H);
+    GYRO_RAW[3] = I2C_READ(MPU6050_ADDRESS, GYRO_YOUT_L);
+    GYRO_RAW[4] = I2C_READ(MPU6050_ADDRESS, GYRO_ZOUT_H);
+    GYRO_RAW[5] = I2C_READ(MPU6050_ADDRESS, GYRO_ZOUT_L);
+
+    int16_t GYRO[3];
+    GYRO[0]= GYRO_RAW[0] << 8 + GYRO_RAW[1];
+    GYRO[1]= GYRO_RAW[2] << 8 + GYRO_RAW[3];
+    GYRO[2]= GYRO_RAW[4] << 8 + GYRO_RAW[5];
+
+    float K_GYRO = 1000/(2^15);
+    GYRO_COOKED[0] = K_GYRO*(float)GYRO[0];
+    GYRO_COOKED[1] = K_GYRO*(float)GYRO[1];
+    GYRO_COOKED[2] = K_GYRO*(float)GYRO[2];
+
+
+    uint8_t ACCEL_RAW[6];
+    ACCEL_RAW[0] = I2C_READ(MPU6050_ADDRESS, ACCEL_XOUT_H);
+    ACCEL_RAW[1] = I2C_READ(MPU6050_ADDRESS, ACCEL_XOUT_L);
+    ACCEL_RAW[2] = I2C_READ(MPU6050_ADDRESS, ACCEL_YOUT_H);
+    ACCEL_RAW[3] = I2C_READ(MPU6050_ADDRESS, ACCEL_YOUT_L);
+    ACCEL_RAW[4] = I2C_READ(MPU6050_ADDRESS, ACCEL_ZOUT_H);
+    ACCEL_RAW[5] = I2C_READ(MPU6050_ADDRESS, ACCEL_ZOUT_L);
+
+    int16_t ACCEL[3];
+    ACCEL[0]= ACCEL_RAW[0] << 8 + ACCEL_RAW[1];
+    ACCEL[1]= ACCEL_RAW[2] << 8 + ACCEL_RAW[3];
+    ACCEL[2]= ACCEL_RAW[4] << 8 + ACCEL_RAW[5];
+
+    float K_ACCEL = 2/(2^15);
+    ACCEL_COOKED[0] = K_ACCEL*(float)ACCEL[0];
+    ACCEL_COOKED[1] = K_ACCEL*(float)ACCEL[1];
+    ACCEL_COOKED[2] = K_ACCEL*(float)ACCEL[2];
+}
+
+
+float GYRO_COOKED[3];
+float ACCEL_COOKED[3];
