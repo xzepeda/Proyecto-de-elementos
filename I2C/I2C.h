@@ -23,11 +23,13 @@
 #define GPIO_PORTB_DEN_R    (*((volatile uint32_t *)0x4005951C)) //Para activar funci�n digital
 #define GPIO_PORTB_PCTL_R   (*((volatile uint32_t *)0x4005952C)) //Para el control del puerto
 
-//REGISTROS DEL M�UDLO I2C
+//REGISTROS DEL MÓDULO I2C
 #define I2C0_MSA_R              (*((volatile uint32_t *)0x40020000)) //I2C Master Slave Adress
 #define I2C0_MCS_R              (*((volatile uint32_t *)0x40020004)) //I2C Master Control Status
 #define I2C0_MDR_R              (*((volatile uint32_t *)0x40020008)) //I2C Master Data Register
 #define I2C0_MTPR_R             (*((volatile uint32_t *)0x4002000C)) //I2C Master Time Period
+#define I2C0_MRIS_R             (*((volatile uint32_t *)0x40020014)) //I2C Master Raw Interrupt Status
+#define I2C0_MICR_R             (*((volatile uint32_t *)0x4002001C)) //I2C Master Interrupt Clear
 #define I2C0_MCR_R              (*((volatile uint32_t *)0x40020020)) //I2C Master Congirutation Register
 
 /*
